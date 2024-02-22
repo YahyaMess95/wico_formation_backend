@@ -24,12 +24,11 @@ const sessionSchema = new Schema(
       type: String,
       required: true,
     },
-    type: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
+    type: {
+      type: String,
+      required: true,
+    },
+
     formations: [
       {
         type: Schema.Types.ObjectId,

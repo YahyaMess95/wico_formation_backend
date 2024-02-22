@@ -3,9 +3,9 @@ const logger = require("../../config/logger");
 
 var getFormationConntrollerfn = async (req, res) => {
   try {
-    var Formation = await formationService.getDataFromDBService();
+    var Formation = await formationService.getFormationFromDBService();
 
-    res.status(200).json({ success: true, Formation: Formation });
+    res.status(200).json({ success: true, formation: Formation });
   } catch (error) {
     logger.error("Error:", error.message);
     res.status(500).json({

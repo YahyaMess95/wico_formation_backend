@@ -7,7 +7,7 @@ const temoignageSchema = new Schema(
       type: String,
       required: true,
     },
-    prename: {
+    prenom: {
       type: String,
       required: true,
     },
@@ -36,11 +36,9 @@ const temoignageSchema = new Schema(
       type: String,
       required: true,
     },
-    comment: [
-      {
-        type: String,
-      },
-    ],
+    comment: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

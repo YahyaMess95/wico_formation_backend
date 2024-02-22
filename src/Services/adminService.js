@@ -7,7 +7,7 @@ module.exports.loginadminDBService = (adminDetails) => {
     .then(async (results) => {
       let token = "";
       if (
-        results.tokens.tokenExpDate === new Date() ||
+        results.tokens[0].tokenExpDate < new Date() ||
         results.tokens.length === 0
       ) {
         token = await results.generateAuthToken();

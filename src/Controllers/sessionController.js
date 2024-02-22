@@ -4,9 +4,9 @@ const logger = require("../../config/logger");
 
 var getSessionConntrollerfn = async (req, res) => {
   try {
-    var Session = await sessionService.getDataFromDBService();
+    var Session = await sessionService.getSessionFromDBService();
 
-    res.status(200).json({ success: true, Session: Session });
+    res.status(200).json({ success: true, session: Session });
   } catch (error) {
     logger.error("Error:", error.message);
     res.status(500).json({

@@ -29,6 +29,10 @@ module.exports.getDataFromDBService = () => {
   return userModel
     .find({})
     .then((results) => {
+      results.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
       logger.info("Query results:", results);
       return results;
     })
@@ -101,7 +105,7 @@ module.exports.removeUserDBService = (id) => {
       return DeletedInstance;
     })
     .catch((error) => {
-      logger.error("Error saving document:", error);
+      logger.error("Error removing document:", error);
       throw new Error(error);
     });
 };

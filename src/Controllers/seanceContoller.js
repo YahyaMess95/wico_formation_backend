@@ -5,7 +5,7 @@ var getSeanceConntrollerfn = async (req, res) => {
   try {
     var Seance = await seanceService.getSeanceFromDBService();
 
-    res.status(200).json({ success: true, Seance: Seance });
+    res.status(200).json({ success: true, seance: Seance });
   } catch (error) {
     logger.error("Error:", error.message);
     res.status(500).json({

@@ -31,7 +31,7 @@ module.exports.createSeanceDBService = async (seanceDetails) => {
 
 module.exports.updateSeanceDBService = (id, SeanceDetails) => {
   logger.info(SeanceDetails);
-  return seanceModel
+  return seanceModule
     .findByIdAndUpdate(id, SeanceDetails, { new: true })
     .then((UpdatedInstance) => {
       if (!UpdatedInstance) {
@@ -47,7 +47,7 @@ module.exports.updateSeanceDBService = (id, SeanceDetails) => {
 };
 
 module.exports.removeSeanceDBService = (id) => {
-  return seanceModel
+  return seanceModule
     .findByIdAndDelete(id)
     .then((DeletedInstance) => {
       if (!DeletedInstance) {
