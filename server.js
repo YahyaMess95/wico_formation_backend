@@ -16,6 +16,12 @@ server.use((req, res, next) => {
   next();
 });
 
+server.use(
+  cors({
+    origin: "https://main--lively-marshmallow-4c8289.netlify.app",
+  })
+);
+
 server.use(express.json());
 
 server.use("/user", userRoutes);
