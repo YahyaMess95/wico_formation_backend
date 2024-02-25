@@ -9,23 +9,22 @@ const formationRoutes = require("./routes/formationRoutes");
 const seanceRoutes = require("./routes/seanceRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const temoignageRoutes = require("./routes/temoignageRoutes");
+const auth = require("../middleware/auth");
 
 server.use((req, res, next) => {
   logger.info(`Received request: ${req.method} ${req.url}`);
   next();
 });
 
- 
-
 server.use(express.json());
 
 server.use("/user", userRoutes);
-server.use("/admin", adminRoutes);
-server.use("/contenu", contenuRoutes);
-server.use("/formation", formationRoutes);
-server.use("/seance", seanceRoutes);
-server.use("/session", sessionRoutes);
-server.use("/temoignage", temoignageRoutes);
+server.use("/public", adminRoutes);
+server.use("/contenu", auth, contenuRoutes);
+server.use("/formation", auth, formationRoutes);
+server.use("/seance", auth, seanceRoutes);
+server.use("/session", auth, sessionRoutes);
+server.use("/temoignage", auth, temoignageRoutes);
 
 server.listen(3000, function check(error) {
   if (error) {
