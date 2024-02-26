@@ -9,18 +9,12 @@ const formationRoutes = require("./routes/formationRoutes");
 const seanceRoutes = require("./routes/seanceRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const temoignageRoutes = require("./routes/temoignageRoutes");
-const auth = require("../middleware/auth");
+const auth = require("./middleware/auth");
 
 server.use((req, res, next) => {
   logger.info(`Received request: ${req.method} ${req.url}`);
   next();
 });
-
-server.use(
-  cors({
-    origin: "https://main--lively-marshmallow-4c8289.netlify.app",
-  })
-);
 
 server.use(express.json());
 
