@@ -9,10 +9,11 @@ const formationRoutes = require("./routes/formationRoutes");
 const seanceRoutes = require("./routes/seanceRoutes");
 const sessionRoutes = require("./routes/sessionRoutes");
 const temoignageRoutes = require("./routes/temoignageRoutes");
+const photoRoutes = require("./routes/photoRoutes");
 const auth = require("./middleware/auth");
 
 server.use((req, res, next) => {
-  logger.info(`Received request: ${req.method} ${req.url}`);
+  // logger.info(`Received request: ${req.method} ${req.url}`);
   next();
 });
 
@@ -31,6 +32,7 @@ server.use("/formation", auth, formationRoutes);
 server.use("/seance", auth, seanceRoutes);
 server.use("/session", auth, sessionRoutes);
 server.use("/temoignage", auth, temoignageRoutes);
+server.use("/photos", auth, photoRoutes);
 
 server.listen(3000, function check(error) {
   if (error) {

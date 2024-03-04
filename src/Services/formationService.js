@@ -30,8 +30,6 @@ module.exports.createFormationDBService = async (formationDetails) => {
 };
 
 module.exports.updateFormationDBService = (id, formationDetails) => {
-  logger.info(formationDetails);
-
   return formationModel
     .findById(id)
     .then((formation) => {

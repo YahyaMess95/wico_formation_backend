@@ -1,6 +1,5 @@
 const userModel = require("../Models/userModel");
 const logger = require("../../config/logger");
-const mongoose = require("../../Db/connection");
 
 module.exports.loginuserDBService = (userDetails) => {
   return userModel
@@ -46,6 +45,7 @@ module.exports.createUserDBService = async (userDetails) => {
   try {
     const userModelData = new userModel();
     Object.assign(userModelData, userDetails);
+
     const savedInstance = await userModelData.save();
     logger.info("Document saved successfully:", savedInstance);
     return savedInstance;
@@ -55,13 +55,8 @@ module.exports.createUserDBService = async (userDetails) => {
   }
 };
 
-const isIdAlreadyAdded = (Array, Id) => {
-  return Array.includes(Id);
-};
-
 module.exports.updateUserDBService = (id, userDetails) => {
-  logger.info(userDetails);
-
+  console.log("test", userDetails);
   return userModel
     .findById(id)
     .then((user) => {
@@ -86,11 +81,9 @@ module.exports.updateUserDBService = (id, userDetails) => {
       return user.save();
     })
     .then((updatedUser) => {
-      logger.info("Document saved successfully:", updatedUser);
       return updatedUser;
     })
     .catch((error) => {
-      logger.error("Error saving document:", error);
       throw new Error(error);
     });
 };

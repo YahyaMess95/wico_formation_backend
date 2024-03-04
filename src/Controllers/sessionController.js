@@ -1,6 +1,6 @@
 const sessionService = require("../Services/sessionService");
-const seanceService = require("../Services/seanceService");
 const logger = require("../../config/logger");
+const upload = require("../../middleware/upload");
 
 var getSessionConntrollerfn = async (req, res) => {
   try {
@@ -19,7 +19,15 @@ var getSessionConntrollerfn = async (req, res) => {
 
 var createSessionConntrollerfn = async (req, res) => {
   try {
+    const filename = await upload(req, res);
+
+    if (!filename) {
+      return res.status(400).json({ message: "You must select a file." });
+    }
+
     const SessionDetails = req.body;
+
+    SessionDetails.photo = filename;
 
     const resultRession = await sessionService.createSessionDBService(
       SessionDetails
@@ -42,8 +50,6 @@ var createSessionConntrollerfn = async (req, res) => {
 
 var updateSessionConntrollerfn = async (req, res) => {
   try {
-    logger.info(req.params.id);
-    logger.info(req.body);
     const SessionDetails = req.body;
     const result = await sessionService.updateSessioDBService(
       req.params.id,
@@ -67,8 +73,6 @@ var updateSessionConntrollerfn = async (req, res) => {
 
 var removeSessionConntrollerfn = async (req, res) => {
   try {
-    logger.info(req.params.id);
-
     const result = await sessionService.removeSessionDBService(req.params.id);
 
     res

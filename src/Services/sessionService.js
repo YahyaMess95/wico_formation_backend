@@ -30,8 +30,6 @@ module.exports.createSessionDBService = async (SessionDetails) => {
 };
 
 module.exports.updateSessioDBService = (id, sessionDetails) => {
-  logger.info(sessionDetails);
-
   return sessionModel
     .findById(id)
     .then((session) => {

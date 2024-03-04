@@ -30,7 +30,6 @@ module.exports.createContenuDBService = async (contenuDetails) => {
 };
 
 module.exports.updateContenuDBService = (id, ContenuDetails) => {
-  logger.info(ContenuDetails);
   return contenuModel
     .findByIdAndUpdate(id, ContenuDetails, { new: true })
     .then((UpdatedInstance) => {

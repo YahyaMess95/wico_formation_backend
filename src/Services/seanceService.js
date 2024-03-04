@@ -30,7 +30,6 @@ module.exports.createSeanceDBService = async (seanceDetails) => {
 };
 
 module.exports.updateSeanceDBService = (id, SeanceDetails) => {
-  logger.info(SeanceDetails);
   return seanceModule
     .findByIdAndUpdate(id, SeanceDetails, { new: true })
     .then((UpdatedInstance) => {

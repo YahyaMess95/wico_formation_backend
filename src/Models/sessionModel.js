@@ -12,7 +12,7 @@ const sessionSchema = new Schema(
       type: Date,
       required: true,
     },
-    image: {
+    photo: {
       type: String,
       required: true,
     },
@@ -49,7 +49,6 @@ const sessionSchema = new Schema(
 sessionSchema.path("formations").validate(async function (formations) {
   for (const formationId of formations) {
     try {
-      logger.info(formationId);
       const formation = await mongoose.model("Formation").findById(formationId);
       if (!formation) {
         return false;

@@ -41,8 +41,6 @@ var createFormationConntrollerfn = async (req, res) => {
 
 var updateFormationConntrollerfn = async (req, res) => {
   try {
-    logger.info(req.params.id);
-    logger.info(req.body);
     const FormationDetails = req.body;
     const result = await formationService.updateFormationDBService(
       req.params.id,
@@ -66,8 +64,6 @@ var updateFormationConntrollerfn = async (req, res) => {
 
 var removeFormationConntrollerfn = async (req, res) => {
   try {
-    logger.info(req.params.id);
-
     const result = await formationService.removeFormationDBService(
       req.params.id
     );

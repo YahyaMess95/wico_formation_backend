@@ -1,5 +1,6 @@
 const temoignageService = require("../Services/temoignageService");
 const logger = require("../../config/logger");
+const upload = require("../../middleware/upload");
 
 var getTemoignageConntrollerfn = async (req, res) => {
   try {
@@ -16,9 +17,18 @@ var getTemoignageConntrollerfn = async (req, res) => {
   }
 };
 
-var createTemoignageConntrollerfn = async (req, res) => {
+const createTemoignageConntrollerfn = async (req, res, next) => {
   try {
+    const filename = await upload(req, res);
+
+    if (!filename) {
+      return res.status(400).json({ message: "You must select a file." });
+    }
     const temoignageDetails = req.body;
+    temoignageDetails.photo = filename;
+    temoignageDetails.session = temoignageDetails.sessions.map(
+      (session) => new ObjectId(session)
+    );
     const result = await temoignageService.createTemoignageDBService(
       temoignageDetails
     );
@@ -40,9 +50,14 @@ var createTemoignageConntrollerfn = async (req, res) => {
 
 var updateTemoignageConntrollerfn = async (req, res) => {
   try {
-    logger.info(req.params.id);
-    logger.info(req.body);
+    const filename = await upload(req, res);
+
+    if (!filename) {
+      return res.status(400).json({ message: "You must select a file." });
+    }
     const temoignageDetails = req.body;
+    temoignageDetails.photo = filename;
+
     const result = await temoignageService.updateTemoignageDBService(
       req.params.id,
       temoignageDetails
@@ -65,8 +80,6 @@ var updateTemoignageConntrollerfn = async (req, res) => {
 
 var removeTemoignageConntrollerfn = async (req, res) => {
   try {
-    logger.info(req.params.id);
-
     const result = await temoignageService.removeTemoignageDBService(
       req.params.id
     );

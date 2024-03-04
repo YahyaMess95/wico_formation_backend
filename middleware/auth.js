@@ -5,14 +5,14 @@ const logger = require("../config/logger");
 const auth = async (req, res, next) => {
   try {
     const token = req.header("Authorization").replace("Bearer ", "");
-    logger.info("token : " + token);
+
     const decoded = jwt.verify(token, "admin");
-    logger.info("decoded : " + decoded);
+
     const admin = await adminModel.findOne({
       _id: decoded._id,
       "tokens.token": token,
     });
-    logger.info(admin);
+
     if (!admin) {
       throw new Error();
     }

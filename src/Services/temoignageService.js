@@ -30,8 +30,11 @@ module.exports.createTemoignageDBService = async (temoignageDetails) => {
 };
 
 module.exports.updateTemoignageDBService = (id, temoignageDetails) => {
-  logger.info(temoignageDetails);
-  return temoignageModel
+  const temoignageModelData = new temoignageModel();
+  Object.assign(temoignageModelData, temoignageDetails);
+
+  logger.info("Temoignage saved successfully:", savedInstance);
+  return temoignageModelData
     .findByIdAndUpdate(id, temoignageDetails, { new: true })
     .then((UpdatedInstance) => {
       if (!UpdatedInstance) {

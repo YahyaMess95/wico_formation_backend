@@ -38,8 +38,6 @@ var createSeanceConntrollerfn = async (req, res) => {
 
 var updateSeanceConntrollerfn = async (req, res) => {
   try {
-    logger.info(req.params.id);
-    logger.info(req.body);
     const SeanceDetails = req.body;
     const result = await seanceService.updateSeanceDBService(
       req.params.id,
@@ -63,8 +61,6 @@ var updateSeanceConntrollerfn = async (req, res) => {
 
 var removeSeanceConntrollerfn = async (req, res) => {
   try {
-    logger.info(req.params.id);
-
     const result = await seanceService.removeSeanceDBService(req.params.id);
 
     res

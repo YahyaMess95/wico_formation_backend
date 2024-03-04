@@ -1,9 +1,11 @@
 const userService = require("../Services/userService");
 const logger = require("../../config/logger");
+const upload = require("../../middleware/upload");
 
 var loginuserControllerfn = async (req, res) => {
   try {
     const userDetails = req.body;
+
     const result = await userService.loginuserDBService(userDetails);
 
     res.status(200).json({
@@ -23,9 +25,9 @@ var loginuserControllerfn = async (req, res) => {
 };
 var getDataConntrollerfn = async (req, res) => {
   try {
-    var empolyee = await userService.getDataFromDBService();
+    var user = await userService.getDataFromDBService();
 
-    res.status(200).json({ success: true, user: empolyee });
+    res.status(200).json({ success: true, user: user });
   } catch (error) {
     logger.error("Error:", error.message);
     res.status(500).json({
@@ -36,18 +38,29 @@ var getDataConntrollerfn = async (req, res) => {
   }
 };
 
-var createUserControllerfn = async (req, res) => {
+const createUserControllerfn = async (req, res, next) => {
   try {
+    const filename = await upload(req, res);
+
+    if (!filename) {
+      return res.status(400).json({ message: "You must select a file." });
+    }
     const userDetails = req.body;
+    userDetails.photo = filename;
+
+    console.log("User details:", userDetails);
+
+    // Create user in the database
     const result = await userService.createUserDBService(userDetails);
 
-    res.status(200).json({
+    // Send success response
+    res.status(201).json({
       success: true,
       user: result,
       message: "User created successfully",
     });
   } catch (error) {
-    logger.error("Error:", error.message);
+    console.error("Error:", error.message);
     res.status(500).json({
       success: false,
       error: "Internal Server Error",
@@ -58,9 +71,28 @@ var createUserControllerfn = async (req, res) => {
 
 var updateUserController = async (req, res) => {
   try {
-    logger.info(req.params.id);
-    logger.info(req.body);
+    console.log("body", req.body);
+
+    if (req.file) {
+      console.log("File received:", req.file.originalname);
+      // Handle file processing or storage here
+    } else {
+      console.log("No file received.");
+    }
+
+    if (req.file !== undefined) {
+      const filename = await upload(req, res);
+
+      if (!filename) {
+        return res.status(400).json({ message: "You must select a file." });
+      }
+      userDetails.photo = filename;
+    } else {
+      // return res.status(400).json({ message: "File is undefined" });
+    }
+
     const userDetails = req.body;
+
     const result = await userService.updateUserDBService(
       req.params.id,
       userDetails
@@ -68,9 +100,8 @@ var updateUserController = async (req, res) => {
 
     res
       .status(200)
-      .json({ success: true, user: result, message: "User Updateeeedddddd" });
+      .json({ success: true, user: result, message: "User Updated" });
   } catch (error) {
-    logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
       error: "Internal Server Error",
@@ -81,8 +112,6 @@ var updateUserController = async (req, res) => {
 
 var deleteUserController = async (req, res) => {
   try {
-    logger.info(req.params.id);
-
     const result = await userService.removeUserDBService(req.params.id);
 
     res

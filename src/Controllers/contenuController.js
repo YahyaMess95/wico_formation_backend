@@ -38,8 +38,6 @@ var createContenuConntrollerfn = async (req, res) => {
 
 var updateContenuConntrollerfn = async (req, res) => {
   try {
-    logger.info(req.params.id);
-    logger.info(req.body);
     const ContenuDetails = req.body;
     const result = await contenuService.updateContenuDBService(
       req.params.id,
@@ -63,8 +61,6 @@ var updateContenuConntrollerfn = async (req, res) => {
 
 var removeContenuConntrollerfn = async (req, res) => {
   try {
-    logger.info(req.params.id);
-
     const result = await contenuService.removeContenuDBService(req.params.id);
 
     res
