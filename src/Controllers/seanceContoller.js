@@ -3,7 +3,8 @@ const logger = require("../../config/logger");
 
 var getSeanceConntrollerfn = async (req, res) => {
   try {
-    var Seance = await seanceService.getSeanceFromDBService();
+    const { page, pageSize } = req.query;
+    var Seance = await seanceService.getSeanceFromDBService(page, pageSize);
 
     res.status(200).json({ success: true, seance: Seance });
   } catch (error) {

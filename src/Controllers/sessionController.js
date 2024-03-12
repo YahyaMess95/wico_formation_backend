@@ -4,7 +4,8 @@ const upload = require("../../middleware/upload");
 
 var getSessionConntrollerfn = async (req, res) => {
   try {
-    var Session = await sessionService.getSessionFromDBService();
+    const { page, pageSize } = req.query;
+    var Session = await sessionService.getSessionFromDBService(page, pageSize);
 
     res.status(200).json({ success: true, session: Session });
   } catch (error) {

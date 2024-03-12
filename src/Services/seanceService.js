@@ -1,17 +1,33 @@
 const seanceModule = require("../Models/seanceModule");
 const logger = require("../../config/logger");
 
-module.exports.getSeanceFromDBService = () => {
-  return seanceModule
-    .find({})
-    .then((results) => {
-      logger.info("Query results:", results);
-      return results;
-    })
-    .catch((error) => {
-      logger.error("Error Get Seance:", error);
+module.exports.getSeanceFromDBService = async (page, pageSize) => {
+  if (page != 0 && pageSize != 0) {
+    const skip = (page - 1) * pageSize;
+
+    try {
+      const totalCount = await seanceModule.countDocuments();
+      const results = await seanceModule
+        .find({})
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(pageSize);
+      return { results, totalCount };
+    } catch (error) {
       throw new Error(error);
-    });
+    }
+  } else {
+    return seanceModule
+      .find({})
+      .then((results) => {
+        logger.info("Query results:", results);
+        return results;
+      })
+      .catch((error) => {
+        logger.error("Error Get Session:", error);
+        throw new Error(error);
+      });
+  }
 };
 
 module.exports.createSeanceDBService = async (seanceDetails) => {

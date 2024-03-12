@@ -4,7 +4,11 @@ const upload = require("../../middleware/upload");
 
 var getTemoignageConntrollerfn = async (req, res) => {
   try {
-    var temoignage = await temoignageService.getTemoignageFromDBService();
+    const { page, pageSize } = req.query;
+    var temoignage = await temoignageService.getTemoignageFromDBService(
+      page,
+      pageSize
+    );
 
     res.status(200).json({ success: true, temoignage: temoignage });
   } catch (error) {
@@ -26,9 +30,7 @@ const createTemoignageConntrollerfn = async (req, res, next) => {
     }
     const temoignageDetails = req.body;
     temoignageDetails.photo = filename;
-    temoignageDetails.session = temoignageDetails.sessions.map(
-      (session) => new ObjectId(session)
-    );
+
     const result = await temoignageService.createTemoignageDBService(
       temoignageDetails
     );

@@ -1,22 +1,51 @@
 const sessionModel = require("../Models/sessionModel");
 const logger = require("../../config/logger");
+const mongoose = require("mongoose");
 
-module.exports.getSessionFromDBService = () => {
-  return sessionModel
-    .find({})
-    .then((results) => {
-      logger.info("Query results:", results);
-      return results;
-    })
-    .catch((error) => {
-      logger.error("Error Get Session:", error);
+module.exports.getSessionFromDBService = async (page, pageSize) => {
+  if (page != 0 && pageSize != 0) {
+    const skip = (page - 1) * pageSize;
+
+    try {
+      const totalCount = await sessionModel.countDocuments();
+      const results = await sessionModel
+        .find({})
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(pageSize);
+      return { results, totalCount };
+    } catch (error) {
       throw new Error(error);
-    });
+    }
+  } else {
+    return sessionModel
+      .find({})
+      .then((results) => {
+        logger.info("Query results:", results);
+        return results;
+      })
+      .catch((error) => {
+        logger.error("Error Get Session:", error);
+        throw new Error(error);
+      });
+  }
 };
 
 module.exports.createSessionDBService = async (SessionDetails) => {
   try {
     const sessionModelData = new sessionModel();
+
+    // Split the formations and seances strings into arrays
+    SessionDetails.formations = SessionDetails.formations.split(",");
+    SessionDetails.seances = SessionDetails.seances.split(",");
+
+    // Map over the arrays and convert string IDs to ObjectIds
+    SessionDetails.formations = SessionDetails.formations.map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
+    SessionDetails.seances = SessionDetails.seances.map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
 
     Object.assign(sessionModelData, SessionDetails);
 

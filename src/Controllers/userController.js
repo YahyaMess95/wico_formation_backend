@@ -23,11 +23,13 @@ var loginuserControllerfn = async (req, res) => {
     });
   }
 };
+
 var getDataConntrollerfn = async (req, res) => {
   try {
-    var user = await userService.getDataFromDBService();
+    const { page, pageSize } = req.query;
+    const users = await userService.getDataFromDBService(page, pageSize);
 
-    res.status(200).json({ success: true, user: user });
+    res.status(200).json({ success: true, users: users });
   } catch (error) {
     logger.error("Error:", error.message);
     res.status(500).json({

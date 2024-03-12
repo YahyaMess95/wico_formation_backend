@@ -4,7 +4,7 @@ const userController = require("../src/Controllers/userController");
 const auth = require("../middleware/auth");
 
 // user
-router.route("/login").get(userController.loginuserControllerfn);
+router.route("/login").post(userController.loginuserControllerfn);
 router.route("/getAll").get(auth, userController.getDataConntrollerfn);
 router.route("/create").post(auth, userController.createUserControllerfn);
 router.route("/update/:id").patch(auth, userController.updateUserController);

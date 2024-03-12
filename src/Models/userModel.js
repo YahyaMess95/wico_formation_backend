@@ -69,6 +69,14 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
+userSchema.pre("save", async function (next) {
+  const user = this;
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 8);
+  }
+  next();
+});
+
 // validation middleware
 userSchema.path("sessions").validate(async function (sessions) {
   for (const sessionId of sessions) {
@@ -85,19 +93,19 @@ userSchema.path("sessions").validate(async function (sessions) {
 }, "Invalid session ObjectId");
 
 userSchema.statics.findbyCredentials = async function (login, password) {
-  const student = await this.findOne({ login });
+  const user = await this.findOne({ login });
 
-  if (!student) {
+  if (!user) {
     throw new Error("User not found");
   }
 
-  const check = await bcrypt.compare(password, student.password);
+  const check = await bcrypt.compare(password, user.password);
 
   if (!check) {
     throw new Error("Invalid password");
   }
 
-  return student;
+  return user;
 };
 
 userSchema.methods.generateAuthToken = async function () {

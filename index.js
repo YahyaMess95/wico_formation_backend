@@ -26,7 +26,7 @@ server.use(
 server.use(express.json());
 
 server.use("/user", userRoutes);
-server.use("/public", adminRoutes);
+server.use("/public", userRoutes);
 server.use("/contenu", auth, contenuRoutes);
 server.use("/formation", auth, formationRoutes);
 server.use("/seance", auth, seanceRoutes);

@@ -1,13 +1,14 @@
 const userModel = require("../Models/userModel");
 const logger = require("../../config/logger");
+const mongoose = require("mongoose");
 
 module.exports.loginuserDBService = (userDetails) => {
   return userModel
-    .findbyCredentials(userDetails.name, userDetails.password)
+    .findbyCredentials(userDetails.login, userDetails.password)
     .then(async (results) => {
       let token = "";
       if (
-        results.tokens.tokenExpDate === new Date() ||
+        results.tokens.tokenExpDate < new Date() ||
         results.tokens.length === 0
       ) {
         token = await results.generateAuthToken();
@@ -24,26 +25,30 @@ module.exports.loginuserDBService = (userDetails) => {
     });
 };
 
-module.exports.getDataFromDBService = () => {
-  return userModel
-    .find({})
-    .then((results) => {
-      results.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      logger.info("Query results:", results);
-      return results;
-    })
-    .catch((error) => {
-      logger.error("Error executing query:", error);
-      throw new Error(error);
-    });
+module.exports.getDataFromDBService = async (page, pageSize) => {
+  const skip = (page - 1) * pageSize;
+
+  try {
+    const totalCount = await userModel.countDocuments();
+    const results = await userModel
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageSize);
+    return { users: results, totalCount };
+  } catch (error) {
+    throw new Error(error);
+  }
 };
 
 module.exports.createUserDBService = async (userDetails) => {
   try {
     const userModelData = new userModel();
+    userDetails.sessions = userDetails.sessions.split(",");
+
+    userDetails.sessions = userDetails.sessions.map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
     Object.assign(userModelData, userDetails);
 
     const savedInstance = await userModelData.save();

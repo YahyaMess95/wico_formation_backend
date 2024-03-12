@@ -1,17 +1,19 @@
 const temoignageModel = require("../Models/temoignageModel");
 const logger = require("../../config/logger");
 
-module.exports.getTemoignageFromDBService = () => {
-  return temoignageModel
-    .find({})
-    .then((results) => {
-      logger.info("Query results:", results);
-      return results;
-    })
-    .catch((error) => {
-      logger.error("Error Get Temoignage:", error);
-      throw new Error(error);
-    });
+module.exports.getTemoignageFromDBService = async (page, pageSize) => {
+  const skip = (page - 1) * pageSize;
+  try {
+    const totalCount = await temoignageModel.countDocuments();
+    const results = await temoignageModel
+      .find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageSize);
+    return { results, totalCount };
+  } catch (error) {
+    throw new Error(error);
+  }
 };
 
 module.exports.createTemoignageDBService = async (temoignageDetails) => {

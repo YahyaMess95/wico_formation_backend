@@ -3,7 +3,11 @@ const logger = require("../../config/logger");
 
 var getFormationConntrollerfn = async (req, res) => {
   try {
-    var Formation = await formationService.getFormationFromDBService();
+    const { page, pageSize } = req.query;
+    var Formation = await formationService.getFormationFromDBService(
+      page,
+      pageSize
+    );
 
     res.status(200).json({ success: true, formation: Formation });
   } catch (error) {
