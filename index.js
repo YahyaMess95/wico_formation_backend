@@ -3,7 +3,6 @@ const server = express();
 const cors = require("cors");
 const logger = require("./config/logger");
 const userRoutes = require("./routes/userRoutes");
-const adminRoutes = require("./routes/adminRoutes");
 const contenuRoutes = require("./routes/contenuRoutes");
 const formationRoutes = require("./routes/formationRoutes");
 const seanceRoutes = require("./routes/seanceRoutes");

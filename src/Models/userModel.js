@@ -82,6 +82,7 @@ userSchema.path("sessions").validate(async function (sessions) {
   for (const sessionId of sessions) {
     try {
       const session = await mongoose.model("Session").findById(sessionId);
+
       if (!session) {
         return false;
       }
