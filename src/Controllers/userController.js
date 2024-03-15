@@ -24,6 +24,28 @@ var loginuserControllerfn = async (req, res) => {
   }
 };
 
+var recoverControllerfn = async (req, res) => {
+  try {
+    const email = req.body.email;
+
+    const result = await userService.updatePasswordDBService(email);
+
+    res.status(200).json({
+      success: true,
+      user: result,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    logger.error("Error:", error.message);
+
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+      message: error.message,
+    });
+  }
+};
+
 var getDataConntrollerfn = async (req, res) => {
   try {
     const { page, pageSize } = req.query;
@@ -130,6 +152,7 @@ var deleteUserController = async (req, res) => {
 };
 
 module.exports = {
+  recoverControllerfn,
   loginuserControllerfn,
   getDataConntrollerfn,
   createUserControllerfn,

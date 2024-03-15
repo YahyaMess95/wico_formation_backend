@@ -1,6 +1,7 @@
 const userModel = require("../Models/userModel");
 const logger = require("../../config/logger");
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 module.exports.loginuserDBService = (userDetails) => {
   return userModel
@@ -8,8 +9,8 @@ module.exports.loginuserDBService = (userDetails) => {
     .then(async (results) => {
       let token = "";
       if (
-        results.tokens[0].tokenExpDate < new Date() ||
-        results.tokens.length === 0
+        results.tokens.length === 0 ||
+        results.tokens[0].tokenExpDate < new Date()
       ) {
         token = await results.generateAuthToken();
       } else {
@@ -92,6 +93,37 @@ module.exports.updateUserDBService = (id, userDetails) => {
       throw new Error(error);
     });
 };
+
+module.exports.updatePasswordDBService = async (email) => {
+  try {
+    // Find the user by email
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Generate a random password
+    const randomPassword = generateRandomPassword();
+
+    // Update user's password
+
+    user.password = randomPassword;
+
+    // Save the updated user
+    await user.save();
+    console.log(randomPassword);
+    console.log(user);
+    // Return the generated random password
+    return {
+      login: user.login,
+      randomPassword: randomPassword,
+    };
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 module.exports.removeUserDBService = (id) => {
   return userModel
     .findByIdAndDelete(id)
@@ -107,3 +139,8 @@ module.exports.removeUserDBService = (id) => {
       throw new Error(error);
     });
 };
+
+function generateRandomPassword() {
+  const randomString = Math.random().toString(36).slice(-8);
+  return randomString;
+}
