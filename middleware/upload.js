@@ -1,37 +1,28 @@
-const multer = require("multer");
-const { GridFsStorage } = require("multer-gridfs-storage");
-require("dotenv").config();
+const File = require("../src/Models/fileModel");
 
-var storage = new GridFsStorage({
-  url: process.env.DB_URL,
-  file: (req, file) => {
-    const match = ["image/png", "image/jpeg"];
-
-    if (match.indexOf(file.mimetype) === -1) {
-      const filename = `${Date.now()}-bezkoder-${file.originalname}`;
-
-      return filename;
+async function saveFileToDatabase(req, res, next) {
+  try {
+    if (!req.file) {
+      // If there's no file in the request, move to the next middleware
+      return next();
     }
+    const { filename, path, size, mimetype } = req.file;
 
-    return {
-      bucketName: "Sources",
-      filename: `${Date.now()}-bezkoder-${file.originalname}`,
-    };
-  },
-});
-
-var uploadFiles = multer({ storage: storage }).single("file");
-
-var uploadFilesMiddleware = (req, res) => {
-  return new Promise((resolve, reject) => {
-    uploadFiles(req, res, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(req.file.filename);
-      }
+    const fileRecord = new File({
+      filename,
+      path,
+      size,
+      contentType: mimetype,
     });
-  });
-};
+    const savedFile = await fileRecord.save(); // Save the file record to the database
 
-module.exports = uploadFilesMiddleware;
+    req.savedFilePath = savedFile.path; // Assign the saved file path to the request object
+
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("An error occurred while uploading the file.");
+  }
+}
+
+module.exports = { saveFileToDatabase };

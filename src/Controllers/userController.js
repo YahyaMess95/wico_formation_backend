@@ -1,6 +1,7 @@
 const userService = require("../Services/userService");
 const logger = require("../../config/logger");
-const upload = require("../../middleware/upload");
+const { saveFileToDatabase } = require("../../middleware/upload");
+const multerConfig = require("../../middleware/multerConfig");
 
 var loginuserControllerfn = async (req, res) => {
   try {
@@ -18,7 +19,7 @@ var loginuserControllerfn = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -40,13 +41,13 @@ var recoverControllerfn = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
 };
 
-var getDataConntrollerfn = async (req, res) => {
+const getDataConntrollerfn = async (req, res) => {
   try {
     const { page, pageSize } = req.query;
     const users = await userService.getDataFromDBService(page, pageSize);
@@ -56,7 +57,7 @@ var getDataConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -64,71 +65,107 @@ var getDataConntrollerfn = async (req, res) => {
 
 const createUserControllerfn = async (req, res, next) => {
   try {
-    const filename = await upload(req, res);
+    // Handle file upload
+    multerConfig.single("file")(req, res, async (err) => {
+      if (err) {
+        console.error("Multer error:", err.message);
+        return res.status(400).json({
+          success: false,
+          error: "Bad Request",
+          message: "Échec du téléchargement du fichier",
+        });
+      }
 
-    if (!filename) {
-      return res.status(400).json({ message: "You must select a file." });
-    }
-    const userDetails = req.body;
-    userDetails.photo = filename;
+      // If file upload successful, proceed to save file information to the database
+      await saveFileToDatabase(req, res, async (error) => {
+        if (error) {
+          console.error("Save file to database error:", error.message);
+          return res.status(500).json({
+            success: false,
+            error: "Erreur Interne du Serveur",
+            message:
+              "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+          });
+        }
 
-    console.log("User details:", userDetails);
+        // Retrieve saved file path from the request object
+        const filePath = req.savedFilePath;
 
-    // Create user in the database
-    const result = await userService.createUserDBService(userDetails);
+        // Process user details
+        const userDetails = req.body;
+        userDetails.photo = filePath;
 
-    // Send success response
-    res.status(201).json({
-      success: true,
-      user: result,
-      message: "User created successfully",
+        console.log("User details:", userDetails);
+
+        // Create user in the database
+        const result = await userService.createUserDBService(userDetails);
+
+        // Send success response
+        res.status(201).json({
+          success: true,
+          user: result,
+          message: "User created successfully",
+        });
+      });
     });
   } catch (error) {
     console.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
 };
 
-var updateUserController = async (req, res) => {
+const updateUserController = async (req, res, next) => {
   try {
-    console.log("body", req.body);
-
-    if (req.file) {
-      console.log("File received:", req.file.originalname);
-      // Handle file processing or storage here
-    } else {
-      console.log("No file received.");
-    }
-
-    if (req.file !== undefined) {
-      const filename = await upload(req, res);
-
-      if (!filename) {
-        return res.status(400).json({ message: "You must select a file." });
+    // Handle file upload
+    multerConfig.single("file")(req, res, async (err) => {
+      if (err) {
+        console.error("Multer error:", err.message);
+        return res.status(400).json({
+          success: false,
+          error: "Bad Request",
+          message: "Échec du téléchargement du fichier",
+        });
       }
-      userDetails.photo = filename;
-    } else {
-      // return res.status(400).json({ message: "File is undefined" });
-    }
+      await saveFileToDatabase(req, res, async (error) => {
+        if (error) {
+          console.error("Save file to database error:", error.message);
+          return res.status(500).json({
+            success: false,
+            error: "Erreur Interne du Serveur",
+            message:
+              "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+          });
+        }
 
-    const userDetails = req.body;
+        const userDetails = req.body;
 
-    const result = await userService.updateUserDBService(
-      req.params.id,
-      userDetails
-    );
+        if (req.file) {
+          const filePath = req.savedFilePath;
+          userDetails.photo = filePath;
+        }
 
-    res
-      .status(200)
-      .json({ success: true, user: result, message: "User Updated" });
+        const result = await userService.updateUserDBService(
+          userDetails._id,
+          userDetails
+        );
+
+        // Send success response
+        res.status(200).json({
+          success: true,
+          user: result,
+          message: "User updated successfully",
+        });
+      });
+    });
   } catch (error) {
+    console.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -145,7 +182,7 @@ var deleteUserController = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }

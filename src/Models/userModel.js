@@ -78,18 +78,30 @@ userSchema.pre("save", async function (next) {
 });
 
 // validation middleware
+
 userSchema.path("sessions").validate(async function (sessions) {
+  console.log(sessions);
+  if (sessions.length === 0) {
+    return true; // No need to validate if sessions array is empty
+  }
+
+  // Filter out invalid session IDs
+  const validSessionIds = [];
   for (const sessionId of sessions) {
     try {
       const session = await mongoose.model("Session").findById(sessionId);
-
-      if (!session) {
-        return false;
+      if (session) {
+        validSessionIds.push(sessionId);
       }
     } catch (error) {
-      return false;
+      // Handle error if needed
+      console.error("Error occurred while validating session:", error);
     }
   }
+
+  // Update sessions array with valid session IDs
+  this.sessions = validSessionIds;
+
   return true;
 }, "Invalid session ObjectId");
 

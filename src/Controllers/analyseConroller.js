@@ -13,7 +13,7 @@ var getCountControllerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }

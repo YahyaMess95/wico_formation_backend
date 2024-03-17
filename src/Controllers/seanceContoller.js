@@ -11,7 +11,7 @@ var getSeanceConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -31,7 +31,7 @@ var createSeanceConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -54,7 +54,7 @@ var updateSeanceConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -71,7 +71,7 @@ var removeSeanceConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }

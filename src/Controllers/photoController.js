@@ -1,29 +1,25 @@
-const mongoose = require("../../Db/connection");
-const { GridFSBucket } = require("mongodb"); // Destructure GridFSBucket from mongodb
+const photoService = require("../Services/photoService");
+const logger = require("../../config/logger");
 
-// Function to fetch photo by name
-exports.getPhotoByName = async (req, res) => {
+const getPhoto = async (req, res) => {
   try {
-    const db = mongoose.connection.db; // Access the MongoDB database from the mongoose connection
-    const bucket = new GridFSBucket(db, {
-      // Use db instead of mongoose
-      bucketName: "Sources",
-    });
-    const photoName = req.params.photoName;
-
-    let downloadStream = bucket.openDownloadStreamByName(photoName);
-    downloadStream.on("data", function (data) {
-      return res.write(data); // Removed status(200)
-    });
-    downloadStream.on("error", function (err) {
-      return res.status(404).send({ message: "Cannot download the Image!" });
-    });
-    downloadStream.on("end", () => {
-      return res.end(); // End the response stream
-    });
+    const absolutePhotoPath = await photoService.getPhoto(req, res);
+    // Send the photo file
+    if (!absolutePhotoPath) {
+      return res.status(404).json({ success: false, error: "File not found" });
+    }
+    res.sendFile(absolutePhotoPath);
+    // res.status(200).json({ success: true, users: absolutePhotoPath });
   } catch (error) {
-    return res.status(500).send({
+    logger.error("Error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
+};
+
+module.exports = {
+  getPhoto,
 };

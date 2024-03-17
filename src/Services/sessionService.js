@@ -35,17 +35,29 @@ module.exports.createSessionDBService = async (SessionDetails) => {
   try {
     const sessionModelData = new sessionModel();
 
-    // Split the formations and seances strings into arrays
-    SessionDetails.formations = SessionDetails.formations.split(",");
-    SessionDetails.seances = SessionDetails.seances.split(",");
-
-    // Map over the arrays and convert string IDs to ObjectIds
-    SessionDetails.formations = SessionDetails.formations.map(
-      (id) => new mongoose.Types.ObjectId(id)
-    );
-    SessionDetails.seances = SessionDetails.seances.map(
-      (id) => new mongoose.Types.ObjectId(id)
-    );
+    if (
+      SessionDetails.formations !== "null" &&
+      SessionDetails.formations &&
+      SessionDetails.seances !== "null" &&
+      SessionDetails.seances
+    ) {
+      if (
+        typeof SessionDetails.formations === "string" &&
+        typeof SessionDetails.seances === "string"
+      ) {
+        SessionDetails.formations = SessionDetails.formations.split(",");
+        SessionDetails.seances = SessionDetails.seances.split(",");
+      }
+      SessionDetails.formations = SessionDetails.formations.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
+      SessionDetails.seances = SessionDetails.seances.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
+    } else {
+      SessionDetails.formations = [];
+      SessionDetails.seances = [];
+    }
 
     Object.assign(sessionModelData, SessionDetails);
 
@@ -58,50 +70,49 @@ module.exports.createSessionDBService = async (SessionDetails) => {
   }
 };
 
-module.exports.updateSessioDBService = (id, sessionDetails) => {
-  return sessionModel
-    .findById(id)
-    .then((session) => {
-      if (!session) {
-        throw new Error("Session not found");
-      }
+module.exports.updateSessioDBService = async (id, sessionDetails) => {
+  try {
+    const session = await sessionModel.findById(id);
 
-      Object.keys(sessionDetails).forEach((key) => {
-        if (sessionDetails[key] !== undefined) {
-          session[key] = sessionDetails[key];
-        }
-      });
+    if (!session) {
+      throw new Error("Session not found");
+    }
 
+    if (
+      sessionDetails.formations !== "null" &&
+      sessionDetails.formations &&
+      sessionDetails.seances !== "null" &&
+      sessionDetails.seances
+    ) {
       if (
-        sessionDetails.formations &&
-        Array.isArray(sessionDetails.formations)
+        typeof sessionDetails.formations === "string" &&
+        typeof sessionDetails.seances === "string"
       ) {
-        sessionDetails.formations.forEach((formationId) => {
-          if (!session.formations.includes(formationId)) {
-            session.formations.push(formationId);
-          }
-        });
+        sessionDetails.formations = sessionDetails.formations.split(",");
+        sessionDetails.seances = sessionDetails.seances.split(",");
       }
+      sessionDetails.formations = sessionDetails.formations.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
+      sessionDetails.seances = sessionDetails.seances.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
+    } else {
+      sessionDetails.formations = [];
+      sessionDetails.seances = [];
+    }
 
-      if (sessionDetails.seances && Array.isArray(sessionDetails.seances)) {
-        sessionDetails.seances.forEach((seanceId) => {
-          if (!session.seances.includes(seanceId)) {
-            session.seances.push(seanceId);
-          }
-        });
-      }
+    Object.assign(session, sessionDetails);
+    const updatedSession = await session.save();
 
-      return session.save();
-    })
-    .then((updatedSession) => {
-      logger.info("Session saved successfully:", updatedSession);
-      return updatedSession;
-    })
-    .catch((error) => {
-      logger.error("Error saving Session:", error);
-      throw new Error(error);
-    });
+    logger.info("Session saved successfully:", updatedSession);
+    return updatedSession;
+  } catch (error) {
+    logger.error("Error saving Session:", error);
+    throw new Error(error);
+  }
 };
+
 module.exports.removeSessionDBService = (id) => {
   return sessionModel
     .findByIdAndDelete(id)

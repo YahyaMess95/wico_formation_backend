@@ -1,6 +1,7 @@
 const sessionService = require("../Services/sessionService");
 const logger = require("../../config/logger");
-const upload = require("../../middleware/upload");
+const { saveFileToDatabase } = require("../../middleware/upload");
+const multerConfig = require("../../middleware/multerConfig");
 
 var getSessionConntrollerfn = async (req, res) => {
   try {
@@ -12,38 +13,64 @@ var getSessionConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
 };
 
-var createSessionConntrollerfn = async (req, res) => {
+const createSessionConntrollerfn = async (req, res, next) => {
   try {
-    const filename = await upload(req, res);
+    // Handle file upload
+    multerConfig.single("file")(req, res, async (err) => {
+      if (err) {
+        console.error("Multer error:", err.message);
+        return res.status(400).json({
+          success: false,
+          error: "Bad Request",
+          message: "Échec du téléchargement du fichier",
+        });
+      }
 
-    if (!filename) {
-      return res.status(400).json({ message: "You must select a file." });
-    }
+      // If file upload successful, proceed to save file information to the database
+      await saveFileToDatabase(req, res, async (error) => {
+        if (error) {
+          console.error("Save file to database error:", error.message);
+          return res.status(500).json({
+            success: false,
+            error: "Erreur Interne du Serveur",
+            message:
+              "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+          });
+        }
 
-    const SessionDetails = req.body;
+        // Retrieve saved file path from the request object
+        const filePath = req.savedFilePath;
 
-    SessionDetails.photo = filename;
+        // Process user details
+        const SessionDetails = req.body;
+        SessionDetails.photo = filePath;
 
-    const resultRession = await sessionService.createSessionDBService(
-      SessionDetails
-    );
+        console.log("User details:", SessionDetails);
 
-    res.status(200).json({
-      success: true,
-      session: resultRession,
-      message: "Session created successfully",
+        // Create user in the database
+        const result = await sessionService.createSessionDBService(
+          SessionDetails
+        );
+
+        // Send success response
+        res.status(201).json({
+          success: true,
+          user: result,
+          message: "Session created successfully",
+        });
+      });
     });
   } catch (error) {
-    logger.error("Error:", error.message);
+    console.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -51,22 +78,51 @@ var createSessionConntrollerfn = async (req, res) => {
 
 var updateSessionConntrollerfn = async (req, res) => {
   try {
-    const SessionDetails = req.body;
-    const result = await sessionService.updateSessioDBService(
-      req.params.id,
-      SessionDetails
-    );
+    multerConfig.single("file")(req, res, async (err) => {
+      if (err) {
+        console.error("Multer error:", err.message);
+        return res.status(400).json({
+          success: false,
+          error: "Bad Request",
+          message: "Échec du téléchargement du fichier",
+        });
+      }
+      await saveFileToDatabase(req, res, async (error) => {
+        if (error) {
+          console.error("Save file to database error:", error.message);
+          return res.status(500).json({
+            success: false,
+            error: "Erreur Interne du Serveur",
+            message:
+              "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+          });
+        }
 
-    res.status(200).json({
-      success: true,
-      session: result,
-      message: "Session Updateeeedddddd",
+        const SessionDetails = req.body;
+
+        if (req.file) {
+          const filePath = req.savedFilePath;
+          SessionDetails.photo = filePath;
+        }
+
+        const result = await sessionService.updateSessioDBService(
+          SessionDetails._id,
+          SessionDetails
+        );
+
+        // Send success response
+        res.status(200).json({
+          success: true,
+          session: result,
+          message: "Session Updateeeedddddd",
+        });
+      });
     });
   } catch (error) {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -83,7 +139,7 @@ var removeSessionConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }

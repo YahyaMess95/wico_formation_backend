@@ -6,7 +6,7 @@ const temoignageContoller = require("../src/Controllers/temoignageContoller");
 router.route("/getAll").get(temoignageContoller.getTemoignageConntrollerfn);
 router.route("/create").post(temoignageContoller.createTemoignageConntrollerfn);
 router
-  .route("/update/:id")
+  .route("/update")
   .patch(temoignageContoller.updateTemoignageConntrollerfn);
 router
   .route("/delete/:id")

@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const photoController = require("../src/Controllers/photoController");
 
-router.route("/:photoName").get(photoController.getPhotoByName);
+// photo
+
+router.route("/:filename").get(photoController.getPhoto);
 
 module.exports = router;

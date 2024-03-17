@@ -19,6 +19,7 @@ module.exports.getTemoignageFromDBService = async (page, pageSize) => {
 module.exports.createTemoignageDBService = async (temoignageDetails) => {
   try {
     const temoignageModelData = new temoignageModel();
+
     Object.assign(temoignageModelData, temoignageDetails);
 
     const savedInstance = await temoignageModelData.save();
@@ -30,25 +31,26 @@ module.exports.createTemoignageDBService = async (temoignageDetails) => {
     throw new Error(error);
   }
 };
+module.exports.updateTemoignageDBService = async (id, temoignageDetails) => {
+  try {
+    // Fetch the temoignage document by temoignageId
+    const temoignage = await temoignageModel.findById(id);
 
-module.exports.updateTemoignageDBService = (id, temoignageDetails) => {
-  const temoignageModelData = new temoignageModel();
-  Object.assign(temoignageModelData, temoignageDetails);
+    if (!temoignage) {
+      throw new Error("Temoignage not found");
+    }
 
-  logger.info("Temoignage saved successfully:", savedInstance);
-  return temoignageModelData
-    .findByIdAndUpdate(id, temoignageDetails, { new: true })
-    .then((UpdatedInstance) => {
-      if (!UpdatedInstance) {
-        throw new Error("Temoignage not found");
-      }
-      logger.info("Temoignage saved successfully:", UpdatedInstance);
-      return UpdatedInstance;
-    })
-    .catch((error) => {
-      logger.error("Error saving Temoignage:", error);
-      throw new Error(error);
-    });
+    Object.assign(temoignage, temoignageDetails);
+
+    // Save the updated temoignage document
+    const updatedTemoignage = await temoignage.save();
+
+    logger.info("Temoignage updated successfully:", updatedTemoignage);
+    return updatedTemoignage;
+  } catch (error) {
+    logger.error("Error updating temoignage:", error);
+    throw new Error(error);
+  }
 };
 
 module.exports.removeTemoignageDBService = (id) => {

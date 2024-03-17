@@ -10,7 +10,7 @@ router.route("/recoverpassword").patch(userController.recoverControllerfn);
 router.route("/getAll").get(auth, userController.getDataConntrollerfn);
 router.route("/getState").get(auth, analyseConroller.getCountControllerfn);
 router.route("/create").post(auth, userController.createUserControllerfn);
-router.route("/update/:id").patch(auth, userController.updateUserController);
+router.route("/update").patch(auth, userController.updateUserController);
 router.route("/delete/:id").delete(auth, userController.deleteUserController);
 
 module.exports = router;

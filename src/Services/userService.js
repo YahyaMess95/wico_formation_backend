@@ -1,7 +1,6 @@
 const userModel = require("../Models/userModel");
 const logger = require("../../config/logger");
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 
 module.exports.loginuserDBService = (userDetails) => {
   return userModel
@@ -45,11 +44,18 @@ module.exports.getDataFromDBService = async (page, pageSize) => {
 module.exports.createUserDBService = async (userDetails) => {
   try {
     const userModelData = new userModel();
-    userDetails.sessions = userDetails.sessions.split(",");
 
-    userDetails.sessions = userDetails.sessions.map(
-      (id) => new mongoose.Types.ObjectId(id)
-    );
+    if (userDetails.sessions !== "null" && updatedDetails.sessions) {
+      if (typeof userDetails.sessions === "string") {
+        userDetails.sessions = userDetails.sessions.split(",");
+      }
+      userDetails.sessions = userDetails.sessions.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
+    } else {
+      userDetails.sessions = [];
+    }
+
     Object.assign(userModelData, userDetails);
 
     const savedInstance = await userModelData.save();
@@ -61,37 +67,37 @@ module.exports.createUserDBService = async (userDetails) => {
   }
 };
 
-module.exports.updateUserDBService = (id, userDetails) => {
-  console.log("test", userDetails);
-  return userModel
-    .findById(id)
-    .then((user) => {
-      if (!user) {
-        throw new Error("Document not found");
+module.exports.updateUserDBService = async (userId, updatedDetails) => {
+  try {
+    // Fetch the user document by userId
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (updatedDetails.sessions !== "null" && updatedDetails.sessions) {
+      if (typeof updatedDetails.sessions === "string") {
+        updatedDetails.sessions = updatedDetails.sessions.split(",");
       }
+      updatedDetails.sessions = updatedDetails.sessions.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
+    } else {
+      updatedDetails.sessions = [];
+    }
 
-      Object.keys(userDetails).forEach((key) => {
-        if (userDetails[key] !== undefined) {
-          user[key] = userDetails[key];
-        }
-      });
+    Object.assign(user, updatedDetails);
 
-      if (userDetails.sessions && Array.isArray(userDetails.sessions)) {
-        userDetails.sessions.forEach((sessionId) => {
-          if (!user.sessions.includes(sessionId)) {
-            user.sessions.push(sessionId);
-          }
-        });
-      }
+    // Save the updated user document
+    const updatedUser = await user.save();
 
-      return user.save();
-    })
-    .then((updatedUser) => {
-      return updatedUser;
-    })
-    .catch((error) => {
-      throw new Error(error);
-    });
+    logger.info("Document updated successfully:", updatedUser);
+    return updatedUser;
+  } catch (error) {
+    logger.error("Error updating document:", error);
+    throw new Error(error);
+  }
 };
 
 module.exports.updatePasswordDBService = async (email) => {

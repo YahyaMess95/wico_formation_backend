@@ -14,7 +14,7 @@ var getFormationConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -37,7 +37,7 @@ var createFormationConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -60,7 +60,7 @@ var updateFormationConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
@@ -81,7 +81,7 @@ var removeFormationConntrollerfn = async (req, res) => {
     logger.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Internal Server Error",
+      error: "Erreur Interne du Serveur",
       message: error.message,
     });
   }
