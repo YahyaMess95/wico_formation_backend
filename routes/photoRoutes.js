@@ -4,6 +4,6 @@ const photoController = require("../src/Controllers/photoController");
 
 // photo
 
-router.route("/:filename").get(photoController.getPhoto);
+router.route("/:fileId").get(photoController.getPhoto);
 
 module.exports = router;

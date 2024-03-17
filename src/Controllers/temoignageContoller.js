@@ -26,8 +26,8 @@ const createTemoignageConntrollerfn = async (req, res, next) => {
   try {
     // Handle file upload using multerConfig
     multerConfig.fields([
-      { name: "photo", maxCount: 1 },
-      { name: "cv", maxCount: 1 },
+      { name: "file", maxCount: 1 },
+      { name: "cvfile", maxCount: 1 },
     ])(req, res, async (err) => {
       if (err) {
         console.error("Multer error:", err.message);
@@ -50,14 +50,31 @@ const createTemoignageConntrollerfn = async (req, res, next) => {
           });
         }
 
-        // Retrieve saved file paths from the request object
-        const photoFilePath = req.files["photo"][0].path;
-        const cvFilePath = req.files["cv"][0].path;
+        // Find the file ID in req.savedFileIDs
+        const photoFilePath = req.savedFileIDs.find(
+          (file) => file.fieldname === "file"
+        );
+        const cvFilePath = req.savedFileIDs.find(
+          (file) => file.fieldname === "cvfile"
+        );
+
+        // Ensure file is found
+        if (!photoFilePath && !cvFilePath) {
+          return res.status(400).json({
+            success: false,
+            error: "Bad Request",
+            message: "Le fichier téléchargé est introuvable.",
+          });
+        }
 
         // Process temoignage details
         const temoignageDetails = req.body;
-        temoignageDetails.photo = photoFilePath;
-        temoignageDetails.cv = cvFilePath;
+        if (photoFilePath) {
+          temoignageDetails.photo = photoFilePath.id;
+        }
+        if (cvFilePath) {
+          temoignageDetails.cv = cvFilePath.id;
+        }
 
         console.log("Temoignage details:", temoignageDetails);
 
@@ -87,51 +104,55 @@ const createTemoignageConntrollerfn = async (req, res, next) => {
 const updateTemoignageConntrollerfn = async (req, res) => {
   console.log(req.body);
   try {
-    // Handle file upload using multerConfig
     multerConfig.fields([
-      { name: "photo", maxCount: 1 },
-      { name: "cv", maxCount: 1 },
+      { name: "file", maxCount: 1 },
+      { name: "cvfile", maxCount: 1 },
     ])(req, res, async (err) => {
       if (err) {
         console.error("Multer error:", err.message);
         return res.status(400).json({
           success: false,
           error: "Bad Request",
-          message: "Échec du téléchargement des fichiers",
+          message: "Failed to upload files",
         });
       }
 
-      // If file upload successful, proceed to save file information to the database using saveFileToDatabase
+      // Handle file upload successful, proceed to save file information to the database
       await saveFileToDatabase(req, res, async (error) => {
         if (error) {
           console.error("Save file to database error:", error.message);
           return res.status(500).json({
             success: false,
-            error: "Erreur Interne du Serveur",
-            message:
-              "Une erreur s'est produite lors de la sauvegarde des fichiers dans la base de données.",
+            error: "Internal Server Error",
+            message: "An error occurred while saving files to the database.",
           });
         }
 
-        // Retrieve saved file paths from the request object
-        const photoFilePath = req.files["photo"]
-          ? req.files["photo"][0].path
-          : undefined;
-        const cvFilePath = req.files["cv"]
-          ? req.files["cv"][0].path
-          : undefined;
+        const photoFilePath = req.savedFileIDs.find(
+          (file) => file.fieldname === "file"
+        );
+        const cvFilePath = req.savedFileIDs.find(
+          (file) => file.fieldname === "cvfile"
+        );
+
+        // Ensure file is found
+        if (!photoFilePath && !cvFilePath) {
+          return res.status(400).json({
+            success: false,
+            error: "Bad Request",
+            message: "Le fichier téléchargé est introuvable.",
+          });
+        }
 
         // Process testimonial details
         const temoignageDetails = req.body;
 
         if (photoFilePath) {
-          temoignageDetails.photo = photoFilePath;
+          temoignageDetails.photo = photoFilePath.id;
         }
         if (cvFilePath) {
-          temoignageDetails.cv = cvFilePath;
+          temoignageDetails.cv = cvFilePath.id;
         }
-
-        console.log("Temoignage details:", temoignageDetails);
 
         // Update testimonial in the database
         const result = await temoignageService.updateTemoignageDBService(
@@ -151,7 +172,7 @@ const updateTemoignageConntrollerfn = async (req, res) => {
     console.error("Error:", error.message);
     res.status(500).json({
       success: false,
-      error: "Erreur Interne du Serveur",
+      error: "Internal Server Error",
       message: error.message,
     });
   }

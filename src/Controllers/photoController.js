@@ -5,6 +5,7 @@ const getPhoto = async (req, res) => {
   try {
     const absolutePhotoPath = await photoService.getPhoto(req, res);
     // Send the photo file
+
     if (!absolutePhotoPath) {
       return res.status(404).json({ success: false, error: "File not found" });
     }

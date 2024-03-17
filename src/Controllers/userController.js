@@ -65,49 +65,73 @@ const getDataConntrollerfn = async (req, res) => {
 
 const createUserControllerfn = async (req, res, next) => {
   try {
-    // Handle file upload
-    multerConfig.single("file")(req, res, async (err) => {
-      if (err) {
-        console.error("Multer error:", err.message);
-        return res.status(400).json({
-          success: false,
-          error: "Bad Request",
-          message: "Échec du téléchargement du fichier",
-        });
-      }
-
-      // If file upload successful, proceed to save file information to the database
-      await saveFileToDatabase(req, res, async (error) => {
-        if (error) {
-          console.error("Save file to database error:", error.message);
-          return res.status(500).json({
+    // Handle file upload using multerConfig
+    multerConfig.fields([{ name: "file", maxCount: 1 }])(
+      req,
+      res,
+      async (err) => {
+        if (err) {
+          console.error("Multer error:", err.message);
+          return res.status(400).json({
             success: false,
-            error: "Erreur Interne du Serveur",
-            message:
-              "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+            error: "Bad Request",
+            message: "Échec du téléchargement du fichier",
           });
         }
 
-        // Retrieve saved file path from the request object
-        const filePath = req.savedFilePath;
+        // If file upload successful, proceed to save file information to the database
+        await saveFileToDatabase(req, res, async (error) => {
+          if (error) {
+            console.error("Save file to database error:", error.message);
+            return res.status(500).json({
+              success: false,
+              error: "Erreur Interne du Serveur",
+              message:
+                "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+            });
+          }
 
-        // Process user details
-        const userDetails = req.body;
-        userDetails.photo = filePath;
+          // Ensure req.savedFileIDs is defined and contains the required file
+          if (!req.savedFileIDs || !req.savedFileIDs.length) {
+            return res.status(400).json({
+              success: false,
+              error: "Bad Request",
+              message: "Aucun fichier n'a été téléchargé ou enregistré.",
+            });
+          }
 
-        console.log("User details:", userDetails);
+          // Find the file ID in req.savedFileIDs
+          const file = req.savedFileIDs.find(
+            (file) => file.fieldname === "file"
+          );
 
-        // Create user in the database
-        const result = await userService.createUserDBService(userDetails);
+          // Ensure file is found
+          if (!file) {
+            return res.status(400).json({
+              success: false,
+              error: "Bad Request",
+              message: "Le fichier téléchargé est introuvable.",
+            });
+          }
 
-        // Send success response
-        res.status(201).json({
-          success: true,
-          user: result,
-          message: "User created successfully",
+          // Process user details
+          const userDetails = req.body;
+
+          if (file) {
+            userDetails.photo = file.id;
+          }
+          // Create user in the database
+          const result = await userService.createUserDBService(userDetails);
+
+          // Send success response
+          res.status(201).json({
+            success: true,
+            user: result,
+            message: "Utilisateur créé avec succès",
+          });
         });
-      });
-    });
+      }
+    );
   } catch (error) {
     console.error("Error:", error.message);
     res.status(500).json({
@@ -121,46 +145,70 @@ const createUserControllerfn = async (req, res, next) => {
 const updateUserController = async (req, res, next) => {
   try {
     // Handle file upload
-    multerConfig.single("file")(req, res, async (err) => {
-      if (err) {
-        console.error("Multer error:", err.message);
-        return res.status(400).json({
-          success: false,
-          error: "Bad Request",
-          message: "Échec du téléchargement du fichier",
-        });
-      }
-      await saveFileToDatabase(req, res, async (error) => {
-        if (error) {
-          console.error("Save file to database error:", error.message);
-          return res.status(500).json({
+    multerConfig.fields([{ name: "file", maxCount: 1 }])(
+      req,
+      res,
+      async (err) => {
+        if (err) {
+          console.error("Multer error:", err.message);
+          return res.status(400).json({
             success: false,
-            error: "Erreur Interne du Serveur",
-            message:
-              "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+            error: "Bad Request",
+            message: "Échec du téléchargement du fichier",
           });
         }
+        await saveFileToDatabase(req, res, async (error) => {
+          if (error) {
+            console.error("Save file to database error:", error.message);
+            return res.status(500).json({
+              success: false,
+              error: "Erreur Interne du Serveur",
+              message:
+                "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+            });
+          }
 
-        const userDetails = req.body;
+          const file = req.savedFileIDs.find(
+            (file) => file.fieldname === "file"
+          );
 
-        if (req.file) {
-          const filePath = req.savedFilePath;
-          userDetails.photo = filePath;
-        }
+          if (!file) {
+            return res.status(400).json({
+              success: false,
+              error: "Bad Request",
+              message: "Le fichier téléchargé est introuvable.",
+            });
+          }
+          const userDetails = req.body;
+          // Find the file ID in req.savedFileIDs
 
-        const result = await userService.updateUserDBService(
-          userDetails._id,
-          userDetails
-        );
+          if (file) {
+            userDetails.photo = file.id;
+          }
 
-        // Send success response
-        res.status(200).json({
-          success: true,
-          user: result,
-          message: "User updated successfully",
+          // Ensure file is found
+          if (!file) {
+            return res.status(400).json({
+              success: false,
+              error: "Bad Request",
+              message: "Le fichier téléchargé est introuvable.",
+            });
+          }
+
+          const result = await userService.updateUserDBService(
+            userDetails._id,
+            userDetails
+          );
+
+          // Send success response
+          res.status(200).json({
+            success: true,
+            user: result,
+            message: "User updated successfully",
+          });
         });
-      });
-    });
+      }
+    );
   } catch (error) {
     console.error("Error:", error.message);
     res.status(500).json({

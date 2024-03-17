@@ -44,8 +44,7 @@ module.exports.getDataFromDBService = async (page, pageSize) => {
 module.exports.createUserDBService = async (userDetails) => {
   try {
     const userModelData = new userModel();
-
-    if (userDetails.sessions !== "null" && updatedDetails.sessions) {
+    if (userDetails.sessions !== "null" && userDetails.sessions) {
       if (typeof userDetails.sessions === "string") {
         userDetails.sessions = userDetails.sessions.split(",");
       }

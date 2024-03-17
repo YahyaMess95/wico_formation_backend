@@ -22,50 +22,64 @@ var getSessionConntrollerfn = async (req, res) => {
 const createSessionConntrollerfn = async (req, res, next) => {
   try {
     // Handle file upload
-    multerConfig.single("file")(req, res, async (err) => {
-      if (err) {
-        console.error("Multer error:", err.message);
-        return res.status(400).json({
-          success: false,
-          error: "Bad Request",
-          message: "Échec du téléchargement du fichier",
-        });
-      }
-
-      // If file upload successful, proceed to save file information to the database
-      await saveFileToDatabase(req, res, async (error) => {
-        if (error) {
-          console.error("Save file to database error:", error.message);
-          return res.status(500).json({
+    multerConfig.fields([{ name: "file", maxCount: 1 }])(
+      req,
+      res,
+      async (err) => {
+        if (err) {
+          console.error("Multer error:", err.message);
+          return res.status(400).json({
             success: false,
-            error: "Erreur Interne du Serveur",
-            message:
-              "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+            error: "Bad Request",
+            message: "Échec du téléchargement du fichier",
           });
         }
 
-        // Retrieve saved file path from the request object
-        const filePath = req.savedFilePath;
+        // If file upload successful, proceed to save file information to the database
+        await saveFileToDatabase(req, res, async (error) => {
+          if (error) {
+            console.error("Save file to database error:", error.message);
+            return res.status(500).json({
+              success: false,
+              error: "Erreur Interne du Serveur",
+              message:
+                "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+            });
+          }
+          const file = req.savedFileIDs.find(
+            (file) => file.fieldname === "file"
+          );
+          // Retrieve saved file path from the request object
+          if (!file) {
+            return res.status(400).json({
+              success: false,
+              error: "Bad Request",
+              message: "Le fichier téléchargé est introuvable.",
+            });
+          }
 
-        // Process user details
-        const SessionDetails = req.body;
-        SessionDetails.photo = filePath;
+          // Process user details
+          const SessionDetails = req.body;
+          if (file) {
+            SessionDetails.photo = file.id;
+          }
 
-        console.log("User details:", SessionDetails);
+          console.log("User details:", SessionDetails);
 
-        // Create user in the database
-        const result = await sessionService.createSessionDBService(
-          SessionDetails
-        );
+          // Create user in the database
+          const result = await sessionService.createSessionDBService(
+            SessionDetails
+          );
 
-        // Send success response
-        res.status(201).json({
-          success: true,
-          user: result,
-          message: "Session created successfully",
+          // Send success response
+          res.status(201).json({
+            success: true,
+            user: result,
+            message: "Session created successfully",
+          });
         });
-      });
-    });
+      }
+    );
   } catch (error) {
     console.error("Error:", error.message);
     res.status(500).json({
@@ -78,46 +92,52 @@ const createSessionConntrollerfn = async (req, res, next) => {
 
 var updateSessionConntrollerfn = async (req, res) => {
   try {
-    multerConfig.single("file")(req, res, async (err) => {
-      if (err) {
-        console.error("Multer error:", err.message);
-        return res.status(400).json({
-          success: false,
-          error: "Bad Request",
-          message: "Échec du téléchargement du fichier",
-        });
-      }
-      await saveFileToDatabase(req, res, async (error) => {
-        if (error) {
-          console.error("Save file to database error:", error.message);
-          return res.status(500).json({
+    multerConfig.fields([{ name: "file", maxCount: 1 }])(
+      req,
+      res,
+      async (err) => {
+        if (err) {
+          console.error("Multer error:", err.message);
+          return res.status(400).json({
             success: false,
-            error: "Erreur Interne du Serveur",
-            message:
-              "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+            error: "Bad Request",
+            message: "Échec du téléchargement du fichier",
           });
         }
+        await saveFileToDatabase(req, res, async (error) => {
+          if (error) {
+            console.error("Save file to database error:", error.message);
+            return res.status(500).json({
+              success: false,
+              error: "Erreur Interne du Serveur",
+              message:
+                "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+            });
+          }
 
-        const SessionDetails = req.body;
+          const SessionDetails = req.body;
 
-        if (req.file) {
-          const filePath = req.savedFilePath;
-          SessionDetails.photo = filePath;
-        }
+          if (req.file) {
+            const filePath = req.savedFileIDs.find(
+              (file) => file.fieldname === "file"
+            ).id; // Find photo file ID
+            SessionDetails.photo = filePath;
+          }
 
-        const result = await sessionService.updateSessioDBService(
-          SessionDetails._id,
-          SessionDetails
-        );
+          const result = await sessionService.updateSessioDBService(
+            SessionDetails._id,
+            SessionDetails
+          );
 
-        // Send success response
-        res.status(200).json({
-          success: true,
-          session: result,
-          message: "Session Updateeeedddddd",
+          // Send success response
+          res.status(200).json({
+            success: true,
+            session: result,
+            message: "Session Updateeeedddddd",
+          });
         });
-      });
-    });
+      }
+    );
   } catch (error) {
     logger.error("Error:", error.message);
     res.status(500).json({
