@@ -117,6 +117,22 @@ const updateTemoignageConntrollerfn = async (req, res) => {
         });
       }
 
+      if (!req.files || !req.files["file"] || !req.files["cvfile"]) {
+        // No file uploaded, proceed with updating user details
+        const temoignageDetails = req.body;
+        const result = await temoignageService.updateTemoignageDBService(
+          temoignageDetails._id,
+          temoignageDetails
+        );
+
+        // Send success response
+        return res.status(200).json({
+          success: true,
+          temoignage: result,
+          message: "Temoignage updated successfully",
+        });
+      }
+
       // Handle file upload successful, proceed to save file information to the database
       await saveFileToDatabase(req, res, async (error) => {
         if (error) {

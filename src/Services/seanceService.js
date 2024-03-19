@@ -30,6 +30,16 @@ module.exports.getSeanceFromDBService = async (page, pageSize) => {
   }
 };
 
+module.exports.getoneSeanceFromDBService = async (id) => {
+  try {
+    const result = await seanceModule.findById(id);
+
+    return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 module.exports.createSeanceDBService = async (seanceDetails) => {
   try {
     const seanceModulData = new seanceModule();

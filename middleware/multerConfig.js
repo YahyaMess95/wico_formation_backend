@@ -10,9 +10,14 @@ const createDestinationFolder = (destination) => {
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const destinationFolder = "./uploads";
-    createDestinationFolder(destinationFolder);
-    cb(null, destinationFolder);
+    if (file) {
+      const destinationFolder = "./uploads";
+      createDestinationFolder(destinationFolder);
+      cb(null, destinationFolder);
+    } else {
+      // If no file exists, continue without doing anything
+      cb(null, "./temp"); // Provide a temporary destination
+    }
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);

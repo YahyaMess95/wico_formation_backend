@@ -29,3 +29,25 @@ module.exports.getPhoto = async (req, res) => {
     res.status(500).send("An error occurred while retrieving the photo.");
   }
 };
+
+module.exports.updatePhotoDBService = async (userId, updatedDetails) => {
+  try {
+    // Fetch the user document by userId
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    Object.assign(user, updatedDetails);
+
+    // Save the updated user document
+    const updatedUser = await user.save();
+
+    logger.info("Document updated successfully:", updatedUser);
+    return updatedUser;
+  } catch (error) {
+    logger.error("Error updating document:", error);
+    throw new Error(error);
+  }
+};

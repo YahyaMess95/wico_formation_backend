@@ -63,6 +63,21 @@ const getDataConntrollerfn = async (req, res) => {
   }
 };
 
+var getoneUserConntrollerfn = async (req, res) => {
+  try {
+    var User = await userService.getoneUserFromDBService(req.params.token);
+
+    res.status(200).json({ success: true, user: User });
+  } catch (error) {
+    logger.error("Error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Erreur Interne du Serveur",
+      message: error.message,
+    });
+  }
+};
+
 const createUserControllerfn = async (req, res, next) => {
   try {
     // Handle file upload using multerConfig
@@ -157,6 +172,24 @@ const updateUserController = async (req, res, next) => {
             message: "Échec du téléchargement du fichier",
           });
         }
+
+        if (!req.files || !req.files["file"]) {
+          // No file uploaded, proceed with updating user details
+          const userDetails = req.body;
+          const result = await userService.updateUserDBService(
+            userDetails._id,
+            userDetails
+          );
+
+          // Send success response
+          return res.status(200).json({
+            success: true,
+            user: result,
+            message: "User updated successfully",
+          });
+        }
+
+        // If file is uploaded, proceed with saving file to database
         await saveFileToDatabase(req, res, async (error) => {
           if (error) {
             console.error("Save file to database error:", error.message);
@@ -179,22 +212,12 @@ const updateUserController = async (req, res, next) => {
               message: "Le fichier téléchargé est introuvable.",
             });
           }
-          const userDetails = req.body;
-          // Find the file ID in req.savedFileIDs
 
+          const userDetails = req.body;
           if (file) {
             userDetails.photo = file.id;
           }
-
-          // Ensure file is found
-          if (!file) {
-            return res.status(400).json({
-              success: false,
-              error: "Bad Request",
-              message: "Le fichier téléchargé est introuvable.",
-            });
-          }
-
+          console.log(userDetails._id);
           const result = await userService.updateUserDBService(
             userDetails._id,
             userDetails
@@ -237,6 +260,7 @@ var deleteUserController = async (req, res) => {
 };
 
 module.exports = {
+  getoneUserConntrollerfn,
   recoverControllerfn,
   loginuserControllerfn,
   getDataConntrollerfn,

@@ -104,6 +104,23 @@ var updateSessionConntrollerfn = async (req, res) => {
             message: "Échec du téléchargement du fichier",
           });
         }
+
+        if (!req.files || !req.files["file"]) {
+          // No file uploaded, proceed with updating user details
+          const SessionDetails = req.body;
+          const result = await sessionService.updateSessioDBService(
+            SessionDetails._id,
+            SessionDetails
+          );
+
+          // Send success response
+          return res.status(200).json({
+            success: true,
+            user: result,
+            message: "User updated successfully",
+          });
+        }
+
         await saveFileToDatabase(req, res, async (error) => {
           if (error) {
             console.error("Save file to database error:", error.message);

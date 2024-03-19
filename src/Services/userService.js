@@ -41,6 +41,22 @@ module.exports.getDataFromDBService = async (page, pageSize) => {
   }
 };
 
+module.exports.getoneUserFromDBService = async (token) => {
+  try {
+    const user = await userModel.findOne({ "tokens.token": token });
+
+    if (user) {
+      return user;
+    } else {
+      // User not found
+      return null;
+    }
+  } catch (error) {
+    console.error("Error finding user by token:", error);
+    throw error;
+  }
+};
+
 module.exports.createUserDBService = async (userDetails) => {
   try {
     const userModelData = new userModel();
@@ -69,8 +85,9 @@ module.exports.createUserDBService = async (userDetails) => {
 module.exports.updateUserDBService = async (userId, updatedDetails) => {
   try {
     // Fetch the user document by userId
-    const user = await userModel.findById(userId);
 
+    const user = await userModel.findById(userId);
+    console.log(user);
     if (!user) {
       throw new Error("User not found");
     }

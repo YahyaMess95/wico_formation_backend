@@ -20,6 +20,23 @@ var getFormationConntrollerfn = async (req, res) => {
   }
 };
 
+var getoneFormationConntrollerfn = async (req, res) => {
+  try {
+    var Formation = await formationService.getoneFormationFromDBService(
+      req.params.id
+    );
+
+    res.status(200).json({ success: true, formation: Formation });
+  } catch (error) {
+    logger.error("Error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Erreur Interne du Serveur",
+      message: error.message,
+    });
+  }
+};
+
 var createFormationConntrollerfn = async (req, res) => {
   try {
     const FormationDetails = req.body;
@@ -88,6 +105,7 @@ var removeFormationConntrollerfn = async (req, res) => {
 };
 
 module.exports = {
+  getoneFormationConntrollerfn,
   getFormationConntrollerfn,
   createFormationConntrollerfn,
   updateFormationConntrollerfn,

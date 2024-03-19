@@ -17,6 +17,21 @@ var getSeanceConntrollerfn = async (req, res) => {
   }
 };
 
+var getoneSeanceConntrollerfn = async (req, res) => {
+  try {
+    var Seance = await seanceService.getoneSeanceFromDBService(req.params.id);
+
+    res.status(200).json({ success: true, seance: Seance });
+  } catch (error) {
+    logger.error("Error:", error.message);
+    res.status(500).json({
+      success: false,
+      error: "Erreur Interne du Serveur",
+      message: error.message,
+    });
+  }
+};
+
 var createSeanceConntrollerfn = async (req, res) => {
   try {
     const SeanceDetails = req.body;
@@ -79,6 +94,7 @@ var removeSeanceConntrollerfn = async (req, res) => {
 
 module.exports = {
   getSeanceConntrollerfn,
+  getoneSeanceConntrollerfn,
   createSeanceConntrollerfn,
   updateSeanceConntrollerfn,
   removeSeanceConntrollerfn,

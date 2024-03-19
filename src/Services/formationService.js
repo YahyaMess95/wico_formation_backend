@@ -30,6 +30,16 @@ module.exports.getFormationFromDBService = async (page, pageSize) => {
   }
 };
 
+module.exports.getoneFormationFromDBService = async (id) => {
+  try {
+    const result = await formationModel.findById(id);
+
+    return result;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 module.exports.createFormationDBService = async (formationDetails) => {
   try {
     const formationModelData = new formationModel();
