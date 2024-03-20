@@ -14,23 +14,40 @@ const auth = async (req, res, next) => {
     });
 
     if (!user) {
-      throw new Error();
+      res.status(401).json({
+        success: false,
+        error: "Veuillez vous authentifier",
+        message: "Veuillez vous authentifier",
+      });
     }
     req.user = user;
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      logger.error("Token expired:", error.message);
-      // Handle token expiration error
-      res.status(401).json({ success: false, error: "Token expired" });
+      logger.error("Token expiré :", error.message);
+      // Gérer l'erreur d'expiration du jeton
+      res.status(401).json({
+        success: false,
+        error: "Veuillez vous authentifier",
+        message: "Le jeton a expiré",
+      });
     } else if (error.name === "JsonWebTokenError") {
-      logger.error("Invalid token:", error.message);
-      // Handle other JWT-related errors
-      res.status(401).json({ success: false, error: "Invalid token" });
+      logger.error("Jeton invalide :", error.message);
+      // Gérer les autres erreurs liées au JWT
+      res.status(401).json({
+        success: false,
+        error: "Veuillez vous authentifier",
+        message: "Jeton invalide",
+      });
     } else {
-      // Handle other unexpected errors
-      logger.error("Unexpected error:", error.message);
-      res.status(500).json({ success: false, error: "Please Auth" });
+      // Gérer d'autres erreurs inattendues
+      logger.error("Erreur inattendue :", error.message);
+
+      res.status(500).json({
+        success: false,
+        error: "Veuillez vous authentifier",
+        message: "Veuillez vous authentifier",
+      });
     }
   }
 };

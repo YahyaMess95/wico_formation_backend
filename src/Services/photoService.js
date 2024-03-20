@@ -26,7 +26,11 @@ module.exports.getPhoto = async (req, res) => {
     return absolutePhotoPath;
   } catch (error) {
     console.error(error);
-    res.status(500).send("An error occurred while retrieving the photo.");
+    return res.status(500).json({
+      success: false,
+      error: "Erreur Interne du Serveur",
+      message: "Une erreur s'est produite lors de la récupération de la photo.",
+    });
   }
 };
 
@@ -48,6 +52,7 @@ module.exports.updatePhotoDBService = async (userId, updatedDetails) => {
     return updatedUser;
   } catch (error) {
     logger.error("Error updating document:", error);
+
     throw new Error(error);
   }
 };

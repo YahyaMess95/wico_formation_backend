@@ -67,7 +67,12 @@ async function saveFileToDatabase(req, res, next) {
     next();
   } catch (error) {
     console.error(error);
-    res.status(500).send("An error occurred while uploading the files.");
+    return res.status(500).json({
+      success: false,
+      error: "Erreur Interne du Serveur",
+      message:
+        "Une erreur s'est produite lors de la sauvegarde du fichier dans la base de données.",
+    });
   }
 }
 
