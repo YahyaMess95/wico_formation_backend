@@ -39,7 +39,9 @@ async function saveFileToDatabase(req, res, next) {
 
         if (existingFileRecord) {
           if (existingFileRecord._id.toString() !== req.body[fileField]) {
-            fs.unlinkSync(existingFileRecord.path);
+            if (fs.existsSync(existingFileRecord.path)) {
+              fs.unlinkSync(existingFileRecord.path);
+            }
           }
 
           existingFileRecord.filename = file.filename;
