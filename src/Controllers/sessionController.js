@@ -58,13 +58,13 @@ const createSessionConntrollerfn = async (req, res, next) => {
             });
           }
 
-          // Process user details
+          // Process Session details
           const SessionDetails = req.body;
           if (file) {
             SessionDetails.photo = file.id;
           }
 
-          console.log("User details:", SessionDetails);
+          console.log("Session details:", SessionDetails);
 
           // Create user in the database
           const result = await sessionService.createSessionDBService(
@@ -106,7 +106,7 @@ var updateSessionConntrollerfn = async (req, res) => {
         }
 
         if (!req.files || !req.files["file"]) {
-          // No file uploaded, proceed with updating user details
+          // No file uploaded, proceed with updating Session details
           const SessionDetails = req.body;
           const result = await sessionService.updateSessioDBService(
             SessionDetails._id,

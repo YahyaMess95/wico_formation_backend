@@ -2,6 +2,7 @@ const express = require("express");
 const server = express();
 const cors = require("cors");
 const logger = require("./config/logger");
+const publicRoutes = require("./routes/publicRoutes");
 const userRoutes = require("./routes/userRoutes");
 const contenuRoutes = require("./routes/contenuRoutes");
 const formationRoutes = require("./routes/formationRoutes");
@@ -26,7 +27,7 @@ server.use(express.json());
 server.use("/uploads", express.static(path.join(__dirname, "uploads")));
 //  routes
 server.use("/user", userRoutes);
-server.use("/public", userRoutes);
+server.use("/public", publicRoutes);
 server.use("/contenu", auth, contenuRoutes);
 server.use("/formation", auth, formationRoutes);
 server.use("/seance", auth, seanceRoutes);

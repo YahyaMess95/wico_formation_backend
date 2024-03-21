@@ -35,25 +35,44 @@ module.exports.createSessionDBService = async (SessionDetails) => {
   try {
     const sessionModelData = new sessionModel();
 
-    if (
-      SessionDetails.formations !== "null" &&
-      SessionDetails.formations &&
-      SessionDetails.seances !== "null" &&
-      SessionDetails.seances
-    ) {
+    if (SessionDetails.formations !== null || SessionDetails.seances !== null) {
       if (
-        typeof SessionDetails.formations === "string" &&
+        SessionDetails.formations !== null &&
+        typeof SessionDetails.formations === "string"
+      ) {
+        SessionDetails.formations = SessionDetails.formations
+          .split(",")
+          .map((id) => {
+            try {
+              return new mongoose.Types.ObjectId(id.trim());
+            } catch (error) {
+              console.error("Invalid ObjectId encountered:", id);
+              return null;
+            }
+          })
+          .filter((id) => id !== null);
+      } else {
+        SessionDetails.formations = [];
+      }
+
+      if (
+        SessionDetails.seances !== null &&
         typeof SessionDetails.seances === "string"
       ) {
-        SessionDetails.formations = SessionDetails.formations.split(",");
-        SessionDetails.seances = SessionDetails.seances.split(",");
+        SessionDetails.seances = SessionDetails.seances
+          .split(",")
+          .map((id) => {
+            try {
+              return new mongoose.Types.ObjectId(id.trim());
+            } catch (error) {
+              console.error("Invalid ObjectId encountered:", id);
+              return null;
+            }
+          })
+          .filter((id) => id !== null);
+      } else {
+        SessionDetails.seances = [];
       }
-      SessionDetails.formations = SessionDetails.formations.map(
-        (id) => new mongoose.Types.ObjectId(id)
-      );
-      SessionDetails.seances = SessionDetails.seances.map(
-        (id) => new mongoose.Types.ObjectId(id)
-      );
     } else {
       SessionDetails.formations = [];
       SessionDetails.seances = [];
@@ -78,25 +97,44 @@ module.exports.updateSessioDBService = async (id, sessionDetails) => {
       throw new Error("Session not found");
     }
 
-    if (
-      sessionDetails.formations !== "null" &&
-      sessionDetails.formations &&
-      sessionDetails.seances !== "null" &&
-      sessionDetails.seances
-    ) {
+    if (sessionDetails.formations !== null || sessionDetails.seances !== null) {
       if (
-        typeof sessionDetails.formations === "string" &&
+        sessionDetails.formations !== null &&
+        typeof sessionDetails.formations === "string"
+      ) {
+        sessionDetails.formations = sessionDetails.formations
+          .split(",")
+          .map((id) => {
+            try {
+              return new mongoose.Types.ObjectId(id.trim());
+            } catch (error) {
+              console.error("Invalid ObjectId encountered:", id);
+              return null;
+            }
+          })
+          .filter((id) => id !== null);
+      } else {
+        sessionDetails.formations = [];
+      }
+
+      if (
+        sessionDetails.seances !== null &&
         typeof sessionDetails.seances === "string"
       ) {
-        sessionDetails.formations = sessionDetails.formations.split(",");
-        sessionDetails.seances = sessionDetails.seances.split(",");
+        sessionDetails.seances = sessionDetails.seances
+          .split(",")
+          .map((id) => {
+            try {
+              return new mongoose.Types.ObjectId(id.trim());
+            } catch (error) {
+              console.error("Invalid ObjectId encountered:", id);
+              return null;
+            }
+          })
+          .filter((id) => id !== null);
+      } else {
+        sessionDetails.seances = [];
       }
-      sessionDetails.formations = sessionDetails.formations.map(
-        (id) => new mongoose.Types.ObjectId(id)
-      );
-      sessionDetails.seances = sessionDetails.seances.map(
-        (id) => new mongoose.Types.ObjectId(id)
-      );
     } else {
       sessionDetails.formations = [];
       sessionDetails.seances = [];

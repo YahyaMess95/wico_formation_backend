@@ -118,7 +118,7 @@ const updateTemoignageConntrollerfn = async (req, res) => {
       }
 
       if (!req.files["file"] && !req.files["cvfile"]) {
-        // No file uploaded, proceed with updating user details
+        // No file uploaded, proceed with updating temoignage details
         const temoignageDetails = req.body;
         const result = await temoignageService.updateTemoignageDBService(
           temoignageDetails._id,
